@@ -1,0 +1,174 @@
+<!--
+
+/*
+Affinitomics API Javascript Example Library
+Copyright (C) 2015 Prefrent
+*/
+
+/*
+Version: 0.8
+Author: Prefrent
+Author URI: http://prefrent.com
+*/
+
+// +----------------------------------------------------------------------+
+// | This program is free software; you can redistribute it and/or modify |
+// | it under the terms of the GNU General Public License, version 2, as  |
+// | published by the Free Software Foundation.                           |
+// |                                                                      |
+// | This program is distributed in the hope that it will be useful,      |
+// | but WITHOUT ANY WARRANTY; without even the implied warranty of       |
+// | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        |
+// | GNU General Public License for more details.                         |
+// |                                                                      |
+// | You should have received a copy of the GNU General Public License    |
+// | along with this program; if not, write to the Free Software          |
+// | Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,               |
+// | MA 02110-1301 USA                                                    |
+// +----------------------------------------------------------------------+
+
+
+
+-->
+
+<html>
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+		<script src="js_lib/affinitomics_api_key.js"></script>
+		<script src="js_lib/affinitomics_lib.js"></script>
+	</head>
+
+
+	<body>
+
+		<h3> Affinitomics API Client Example </h3>
+		<br>
+		<br>
+
+		<div id='archetype_info_div' > Archetype Info </div>
+		<br>
+		<div id='related_div' > Related </div>
+		<br>
+		<div id='archetypes_by_domain_div' > Archetypes by Domain </div>
+		<br>
+		<div id='domains_div' > Domains </div>
+		<br>
+		<div id='archetypes_div' > Archetypes </div>
+		<br>
+		<div id='sync_archetype_div' > Sync </div>
+		<br>
+		<div id='remove_archetype_div' > Remove Archetype </div>
+
+
+	</body>
+
+</html>
+
+<script>
+
+$( document ).ready( initFunction );
+
+var archetypesToSync = 0;
+var testDomain1 = 'affinitomics_ex_js'
+var testDomain2 = 'affinitomics_ex_js_2'
+
+function initFunction()
+{	
+	setupArchetypes();
+}
+
+function runQueries()
+{
+	domains();
+	archetypes();
+	archetypeInfo();
+	related();
+}
+
+function archetypeInfo()
+{
+	getArchetypeInfo('viper', testDomain1, handleDataFromAimojo, null);	
+}
+
+function related()
+{
+	getRelatedArchetypes('viper', testDomain1, '5', '', handleDataFromAimojo, null);
+}
+
+function archetypes()
+{
+	var archetypes = getArchetypes(handleDataFromAimojo, null);
+	var archetypesByDomain = getArchetypesByDomain(testDomain1, handleDataFromAimojo, null);
+}
+
+function domains()
+{
+	var domains = getDomains(handleDataFromAimojo, null);
+}
+
+function setupArchetypes()
+{
+	syncArchetype('bike', testDomain1, 'bicycle', 'car, moped, skateboard', 'horses, horse', '', '', '', '', handleDataFromAimojo);
+	archetypesToSync++;
+
+	syncArchetype('cuda', testDomain1, 'bicycle', 'car, moped, skateboard', 'horses, horse', '', '', '', '', handleDataFromAimojo);
+	archetypesToSync++;
+	
+	syncArchetype('viper', testDomain1, 'car', 'bicycle, moped, skateboard', 'horses, horse', '', '', '', '', handleDataFromAimojo);
+	archetypesToSync++;
+	
+	syncArchetype('motorcycle', testDomain1, 'bicycle', 'car, skateboard', 'horses, horse', '', '', '', '', handleDataFromAimojo);
+	archetypesToSync++;
+	
+	syncArchetype('horse', testDomain1, 'horse', 'horse, horses', 'bicycle, car', '', '', '', '', handleDataFromAimojo);
+	archetypesToSync++;
+	
+}
+
+
+function handleDataFromAimojo(responseObject, completionData, callType)
+{
+	if (callType.localeCompare('RequestArchetypesByDomain') == 0)
+	{
+		jQuery('#archetypes_by_domain_div').append('<li>' + JSON.stringify(responseObject) + '</li>');
+	}
+	else if (callType.localeCompare('RequestArchetypes') == 0)
+	{
+		jQuery('#archetypes_div').append('<li>' + JSON.stringify(responseObject) + '</li>');
+	}
+	else if (callType.localeCompare('RequestDomains') == 0)
+	{
+		jQuery('#domains_div').append('<li>' + JSON.stringify(responseObject) + '</li>');
+	}
+	else if (callType.localeCompare('SyncArchetype') == 0)
+	{
+		jQuery('#sync_archetype_div').append('<li>' + JSON.stringify(responseObject) + '</li>');
+		archetypesToSync--;
+		if (archetypesToSync == 0)
+		{	//we want to wait for all archetypes, so far, to be synced before running queries 
+			runQueries();
+		}
+	}
+	else if (callType.localeCompare('RemoveArchetype') == 0)
+	{
+		jQuery('#remove_archetype_div').append('<li>' + JSON.stringify(responseObject) + '</li>');
+		
+	}
+	else if (callType.localeCompare('RequestRelatedArchetypes') == 0)
+	{
+		jQuery('#related_div').append('<li>' + JSON.stringify(responseObject) + '</li>');
+		
+	}
+	else if (callType.localeCompare('RequestArchetypeInfo') == 0)
+	{
+		jQuery('#archetype_info_div').append('<li>' + JSON.stringify(responseObject) + '</li>');
+		
+	}
+
+}
+
+</script>
+
+
+
+
